@@ -53,7 +53,7 @@
 				{#if loginType === 'phone'}
 					<label>
 						Phone
-						<input type="tel" name="phone" pattern="^1[3456789]\d{9}$" required />
+						<input type="tel" name="phone" required />
 					</label>
 				{:else if loginType === 'email'}
 					<label>
