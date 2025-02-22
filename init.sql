@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- 在 users 表下方添加 session 表
 CREATE TABLE IF NOT EXISTS session (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id TEXT PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expires_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,

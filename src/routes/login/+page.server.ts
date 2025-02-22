@@ -61,7 +61,7 @@ export const actions: Actions = {
 		}
 
 		const sessionToken = auth.generateSessionToken();
-		const session = await auth.createSession(sessionToken, existingUser.id);
+		const session = await auth.createSession(sessionToken, existingUser.id , event);
 		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
 		return redirect(302, '/lucia');

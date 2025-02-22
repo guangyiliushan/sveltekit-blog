@@ -15,10 +15,16 @@ export function generateSessionToken() {
 	return token;
 }
 
-export async function createSession(token: string, userId: string) {
-    const session = {
+export async function createSession(token: string, userId: string,	event?: RequestEvent) {
+    const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+    const session: table.Session = {
+        id: sessionId,
         userId,
-		expiresAt: new Date(Date.now() + DAY_IN_MS * 15),
+        expiresAt: new Date(Date.now() + DAY_IN_MS * 30),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+		userAgent: event?.request?.headers?.get('user-agent') || '', 
+        ipAddress: event?.getClientAddress?.() || '' 
     };
     await db.insert(table.session).values(session);
     return session;

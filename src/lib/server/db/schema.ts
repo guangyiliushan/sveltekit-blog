@@ -19,7 +19,7 @@ export const posts = pgTable('posts', {
 });
 
 export const session = pgTable('session', {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: text('id').primaryKey().notNull(),
     userId: uuid('user_id')
         .notNull()
         .references(() => users.id, { onDelete: 'cascade' }),
