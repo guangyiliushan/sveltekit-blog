@@ -3,3 +3,8 @@
 
     let { data }: { data: PageData } = $props();
 </script>
+
+
+<svelte:head></svelte:head>
+<main>
+</main>
