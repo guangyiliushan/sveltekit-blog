@@ -19,10 +19,10 @@
 			<li aria-current={page.url.pathname === '/' ? 'page' : undefined}>
 				<a href="/">首页</a>
 			</li>
-			<li aria-current={page.url.pathname === '/blog' ? 'page' : undefined}>
+			<li aria-current={page.url.pathname.startsWith('/blog') ? 'page' : undefined}>
 				<a href="/blog">博客</a>
 			</li>
-			<li aria-current={page.url.pathname.startsWith('/login') ? 'page' : undefined}>
+			<li aria-current={page.url.pathname === '/login' || page.url.pathname === '/lucia' ? 'page' : undefined}>
 				<a href="/login">登录</a>
 			</li>
 		</ul>

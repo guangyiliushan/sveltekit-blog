@@ -23,8 +23,8 @@ export async function createSession(token: string, userId: string,	event?: Reque
         expiresAt: new Date(Date.now() + DAY_IN_MS * 30),
         createdAt: new Date(),
         updatedAt: new Date(),
-		userAgent: event?.request?.headers?.get('user-agent') || '', 
-        ipAddress: event?.getClientAddress?.() || '' 
+		userAgent: event?.request?.headers?.get('user-agent') || null, 
+        ipAddress: event?.getClientAddress?.() || null 
     };
     await db.insert(table.session).values(session);
     return session;
@@ -39,7 +39,8 @@ export async function validateSessionToken(token: string) {
 				 username: table.users.username,
 				 email: table.users.email,
 				 phone: table.users.phone,
-				 nickname: table.users.nickname
+				 nickname: table.users.nickname,
+				 avatar: table.users.avatar
 			 },
 			session: table.session
 		})

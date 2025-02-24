@@ -8,12 +8,13 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(100) NOT NULL,
     email VARCHAR(255),
     phone VARCHAR(20),
+    email_verified BOOLEAN DEFAULT FALSE,
+    phone_verified BOOLEAN DEFAULT FALSE,
     nickname VARCHAR(50) NOT NULL,
     avatar TEXT DEFAULT 'default.svg',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     birthday DATE CHECK (birthday > '1900-01-01'),
     location VARCHAR(100),
-    posts UUID[]
 ) WITH (autovacuum_enabled = true);
 
 -- 在 users 表下方添加 session 表
@@ -25,6 +26,19 @@ CREATE TABLE IF NOT EXISTS session (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     user_agent TEXT,
     ip_address INET
+) WITH (autovacuum_enabled = true);
+
+-- 在 session 表下方添加 verification_codes 表
+CREATE TABLE IF NOT EXISTS verification_codes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    verification_code VARCHAR(6) NOT NULL,
+    target VARCHAR(255) NOT NULL,
+    code_type VARCHAR(10) NOT NULL CHECK (code_type IN ('email', 'sms')),
+    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '5 minutes'),
+    is_used BOOLEAN DEFAULT FALSE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    attempt_count INT DEFAULT 0 CHECK (attempt_count BETWEEN 0 AND 5),
+    last_attempt_at TIMESTAMPTZ
 ) WITH (autovacuum_enabled = true);
 
 -- 创建 posts 表，使用 UUID 类型和 TIMESTAMPTZ 类型
@@ -42,6 +56,13 @@ CREATE TABLE IF NOT EXISTS posts (
     tags TEXT[],
     is_deleted BOOLEAN DEFAULT FALSE NOT NULL
 ) PARTITION BY RANGE (created_at);
+
+-- 建议新增关联表代替数组字段
+CREATE TABLE IF NOT EXISTS user_posts (
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, post_id)
+);
 
 -- 在分区函数中添加错误处理
 CREATE OR REPLACE FUNCTION create_post_partition()
@@ -91,6 +112,15 @@ CREATE INDEX idx_session_expires ON session(expires_at);
 COMMENT ON TABLE session IS '用户会话记录表';
 COMMENT ON COLUMN session.user_agent IS '用户客户端信息';
 COMMENT ON COLUMN session.ip_address IS '登录IP地址';
+
+-- 添加验证码表索引
+CREATE INDEX idx_verification_code ON verification_codes(verification_code, target);
+CREATE INDEX idx_unused_codes ON verification_codes USING BRIN (created_at) WHERE is_used = FALSE;
+
+-- 添加验证码表注释
+COMMENT ON TABLE verification_codes IS '验证码存储表';
+COMMENT ON COLUMN verification_codes.target IS '验证目标（邮箱/手机号）';
+COMMENT ON COLUMN verification_codes.attempt_count IS '尝试次数限制防暴力破解';
 
 -- 创建软删除用户的索引
 CREATE INDEX idx_users_deleted ON users(is_deleted) WHERE is_deleted = TRUE;

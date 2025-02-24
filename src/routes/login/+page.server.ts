@@ -117,7 +117,7 @@ export const actions: Actions = {
 			const [{ id: userId }] = await db.select({ id: table.users.id }).from(table.users).where(eq(table.users.username, username)).limit(1);
 
 			const sessionToken = auth.generateSessionToken();
-			const session = await auth.createSession(sessionToken, userId);
+			const session = await auth.createSession(sessionToken, userId , event);
 			auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 		} catch (e) {
 			console.error(e);

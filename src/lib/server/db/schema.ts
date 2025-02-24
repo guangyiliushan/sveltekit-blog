@@ -1,4 +1,5 @@
-import { pgTable, serial, text, integer, timestamp ,uuid, inet } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, boolean, timestamp ,uuid, inet } from 'drizzle-orm/pg-core';
+import { availableMemory } from 'process';
 
 export const users = pgTable('users', {
 	id: text('id').primaryKey(),
@@ -6,7 +7,10 @@ export const users = pgTable('users', {
 	password: text('password').notNull(),
 	phone: text('phone'),
 	email: text('email'),
+    email_verified: boolean('email_verified').default(false),
+    phone_verified: boolean('phone_verified').default(false),
 	nickname: text('nickname').notNull(),
+    avatar: text('avatar').default('default.svg'),
 });
 
 export const posts = pgTable('posts', {
