@@ -1,5 +1,4 @@
-import { pgTable, serial, text, boolean, timestamp ,uuid, inet } from 'drizzle-orm/pg-core';
-import { availableMemory } from 'process';
+import { pgTable, text, boolean, timestamp ,uuid, inet } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
 	id: text('id').primaryKey(),
@@ -37,7 +36,21 @@ export const session = pgTable('session', {
     ipAddress: inet('ip_address')
 });
 
-export type Session = typeof session.$inferSelect;
+export const verification_codes = pgTable('verification_codes', {
+    id: uuid('id').primaryKey(),
+    verification_code: text('verification_code').notNull(),
+    target: text('target').notNull(),
+    code_type: text('code_type').notNull().$type<'email' | 'sms'>(),
+    expires_at: timestamp('expires_at', { withTimezone: true })
+        .defaultNow()
+        .notNull(),
+    is_used: boolean('is_used').default(false).notNull(),
+    created_at: timestamp('created_at', { withTimezone: true })
+        .defaultNow()
+        .notNull()
+});
 
 export type User = typeof users.$inferSelect;
+export type Session = typeof session.$inferSelect;
+export type VerificationCode = typeof verification_codes.$inferSelect;
 export type Post = typeof posts.$inferSelect;

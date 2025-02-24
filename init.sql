@@ -36,9 +36,7 @@ CREATE TABLE IF NOT EXISTS verification_codes (
     code_type VARCHAR(10) NOT NULL CHECK (code_type IN ('email', 'sms')),
     expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '5 minutes'),
     is_used BOOLEAN DEFAULT FALSE NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    attempt_count INT DEFAULT 0 CHECK (attempt_count BETWEEN 0 AND 5),
-    last_attempt_at TIMESTAMPTZ
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) WITH (autovacuum_enabled = true);
 
 -- 创建 posts 表，使用 UUID 类型和 TIMESTAMPTZ 类型

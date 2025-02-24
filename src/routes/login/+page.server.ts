@@ -1,5 +1,4 @@
 import { hash, verify } from '@node-rs/argon2';
-import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import * as auth from '$lib/server/auth';
@@ -49,7 +48,9 @@ export const actions: Actions = {
 		if (!existingUser) {
 			return fail(400, { message: 'Incorrect username or password' });
 		}
-
+		if (!password) {
+			return fail(400, { message: 'Password is required' });
+		}
 		const validPassword = await verify(existingUser.password, password.toString(), {
 			memoryCost: 19456,
 			timeCost: 2,
@@ -92,11 +93,11 @@ export const actions: Actions = {
 			const email = formData.get('email');
 			
 			if (phone) {
-				const [existingPhone] = await db.select().from(table.users).where(eq(table.users.phone, phone));
+				const [existingPhone] = await db.select().from(table.users).where(eq(table.users.phone, phone.toString()));
 				if (existingPhone) return fail(400, { message: '手机号已注册' });
 			}
 			if (email) {
-				const [existingEmail] = await db.select().from(table.users).where(eq(table.users.email, email));
+				const [existingEmail] = await db.select().from(table.users).where(eq(table.users.email, email.toString()));
 				if (existingEmail) return fail(400, { message: '邮箱已注册' });
 			}
 			if (!phone && !email) {
@@ -107,11 +108,11 @@ export const actions: Actions = {
 				return fail(400, { message: '用户名已存在' });
 			}
 			await db.insert(table.users).values({
-				username,
+				username: username as string,
 				password: passwordHash,
 				phone: phone || null,
 				email: email || null,
-				nickname: username
+				nickname: username as string
 			});
 
 			const [{ id: userId }] = await db.select({ id: table.users.id }).from(table.users).where(eq(table.users.username, username)).limit(1);
