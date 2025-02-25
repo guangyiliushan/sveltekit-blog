@@ -1,5 +1,6 @@
 import { hash, verify } from '@node-rs/argon2';
 import { fail, redirect } from '@sveltejs/kit';
+// import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { eq } from 'drizzle-orm';
 import * as auth from '$lib/server/auth';
 import { db } from '$lib/server/db';
@@ -107,7 +108,8 @@ export const actions: Actions = {
 			if (existingUsername) {
 				return fail(400, { message: '用户名已存在' });
 			}
-			await db.insert(table.users).values({
+
+			await db.insert(table.users).values({	
 				username: username as string,
 				password: passwordHash,
 				phone: phone || null,

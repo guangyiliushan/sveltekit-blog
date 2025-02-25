@@ -43,10 +43,12 @@ export const actions: Actions = {
 		
 		// 保存验证码到数据库（有效期5分钟）
 		await db.insert(verification_codes).values({
+			id : crypto.randomUUID(),
 			target: target!,
-			code_type: verifyType,
+			code_type: verifyType as 'email' | 'sms',
 			verification_code: code,
-			expires_at: new Date(Date.now() + 300000)
+			expires_at: new Date(Date.now() + 300000),
+			created_at: new Date()
 		});
 
 		// 这里添加实际发送验证码的逻辑（邮件/短信服务）

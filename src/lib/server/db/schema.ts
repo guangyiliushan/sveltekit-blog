@@ -1,7 +1,8 @@
 import { pgTable, text, boolean, timestamp ,uuid, inet } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 export const users = pgTable('users', {
-	id: text('id').primaryKey(),
+	id: uuid('id').primaryKey().$default(() => sql`uuid_generate_v4()`),
 	username: text('username').notNull().unique(),
 	password: text('password').notNull(),
 	phone: text('phone'),
@@ -13,7 +14,7 @@ export const users = pgTable('users', {
 });
 
 export const posts = pgTable('posts', {
-	id: text('id').primaryKey(),
+	id: text('id').primaryKey().notNull(),
 	title: text('title').notNull(),
 	content: text('content').notNull(),
 	authorId: uuid('author_id').references(() => users.id),

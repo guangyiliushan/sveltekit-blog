@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     avatar TEXT DEFAULT 'default.svg',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     birthday DATE CHECK (birthday > '1900-01-01'),
-    location VARCHAR(100),
+    location VARCHAR(100)
 ) WITH (autovacuum_enabled = true);
 
 -- 在 users 表下方添加 session 表
