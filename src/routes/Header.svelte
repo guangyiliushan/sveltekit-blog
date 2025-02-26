@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import type { LayoutServerData } from './$types';
 	import logo from '$lib/images/svelte-logo.svg';
 	import avatar from '$lib/images/default.svg';
+	import { IconHome, IconBook, IconLogin, IconRocket, IconUsers } from '@tabler/icons-svelte';
+    export let data: LayoutServerData;
 </script>
 
 <header>
@@ -17,14 +20,48 @@
 		</svg>
 		<ul>
 			<li aria-current={page.url.pathname === '/' ? 'page' : undefined}>
-				<a href="/">首页</a>
+				<a href="/">
+					<IconHome size={20} />
+					<span class="ml-2">首页</span>
+				</a>
 			</li>
 			<li aria-current={page.url.pathname.startsWith('/blog') ? 'page' : undefined}>
-				<a href="/blog">博客</a>
+				<a href="/blog">
+					<IconBook size={20} />
+					<span class="ml-2">博客</span>
+				</a>
 			</li>
-			<li aria-current={page.url.pathname === '/login' || page.url.pathname === '/lucia' ? 'page' : undefined}>
-				<a href="/login">登录</a>
+			<li>
+				<a href="https://www.foreverblog.cn/go.html">
+					<IconRocket size={20} />
+					<span class="ml-2">虫洞</span>
+				</a>
 			</li>
+			<li>
+				<a href="https://www.travellings.cn/go">
+					<IconUsers size={20} />
+					<span class="ml-2">友链</span>
+				</a>
+			</li>
+			{#if data?.user}
+				<li aria-current={page.url.pathname === '/lucia' ? 'page' : undefined}>
+					<a href="/lucia">
+						<img 
+							src= {avatar} 
+							alt="avatar" 
+							class="w-6 h-6 rounded-full mr-2" 
+						/>
+						<span class="align-middle">{data.user.nickname}</span>
+					</a>
+				</li>
+			{:else}
+				<li aria-current={page.url.pathname === '/login' ? 'page' : undefined}>
+					<a href="/login">
+						<IconLogin size={20} />
+						<span class="ml-2">登录</span>
+					</a>
+				</li>
+			{/if}
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />

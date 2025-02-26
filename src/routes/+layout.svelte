@@ -1,14 +1,11 @@
 <script lang="ts">
     import Header from './Header.svelte';
-    import Sidebar from './Sidebar.svelte'; 
     import '../app.css';
-
-    let { children } = $props();
+    let { children,data} = $props();
 </script>
 
 <div class="app">
-    <Header />
-    <!-- <Sidebar />  -->
+    <Header {data}/>
     
     <main>
         {@render children()}
