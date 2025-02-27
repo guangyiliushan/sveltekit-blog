@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS verification_codes (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) WITH (autovacuum_enabled = true);
 
--- 创建 posts 表，使用 UUID 类型和 TIMESTAMPTZ 类型
+-- 创建 posts 表
 CREATE TABLE IF NOT EXISTS posts (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id TEXT PRIMARY KEY, 
     title VARCHAR(120) NOT NULL,
     content TEXT NOT NULL,
     published BOOLEAN DEFAULT FALSE,
@@ -51,9 +51,8 @@ CREATE TABLE IF NOT EXISTS posts (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     author_id UUID REFERENCES users(id) ON DELETE CASCADE,
     category VARCHAR(30),
-    tags TEXT[],
     is_deleted BOOLEAN DEFAULT FALSE NOT NULL
-) PARTITION BY RANGE (created_at);
+) WITH (autovacuum_enabled = true);
 
 -- 建议新增关联表代替数组字段
 CREATE TABLE IF NOT EXISTS user_posts (
@@ -61,28 +60,6 @@ CREATE TABLE IF NOT EXISTS user_posts (
     post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, post_id)
 );
-
--- 在分区函数中添加错误处理
-CREATE OR REPLACE FUNCTION create_post_partition()
-RETURNS TRIGGER AS $$
-BEGIN
-    DECLARE
-        partition_name TEXT;
-    partition_name := format('posts_%s', to_char(NEW.created_at, 'YYYY_MM'));
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = partition_name) THEN
-        EXECUTE format(
-            'CREATE TABLE %I PARTITION OF posts FOR VALUES FROM (%L) TO (%L)',
-            partition_name,
-            date_trunc('month', NEW.created_at),
-            date_trunc('month', NEW.created_at) + INTERVAL '1 month'
-        );
-    END IF;
-    EXCEPTION
-        WHEN duplicate_table THEN
-            RAISE NOTICE 'Partition % already exists', partition_name;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
 -- 添加 phone 字段验证
 ALTER TABLE users
@@ -118,38 +95,15 @@ CREATE INDEX idx_unused_codes ON verification_codes USING BRIN (created_at) WHER
 -- 添加验证码表注释
 COMMENT ON TABLE verification_codes IS '验证码存储表';
 COMMENT ON COLUMN verification_codes.target IS '验证目标（邮箱/手机号）';
-COMMENT ON COLUMN verification_codes.attempt_count IS '尝试次数限制防暴力破解';
 
 -- 创建软删除用户的索引
 CREATE INDEX idx_users_deleted ON users(is_deleted) WHERE is_deleted = TRUE;
-
--- 创建默认分区
-CREATE TABLE posts_default PARTITION OF posts DEFAULT;
 
 -- 索引优化
 CREATE INDEX idx_posts_author ON posts(author_id);
 CREATE INDEX idx_posts_created ON posts USING BRIN (created_at);
 
--- 创建分区函数
-CREATE OR REPLACE FUNCTION create_post_partition()
-RETURNS TRIGGER AS $$
-DECLARE
-    partition_name TEXT;
-BEGIN
-    partition_name := format('posts_%s', to_char(NEW.created_at, 'YYYY_MM'));
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = partition_name) THEN
-        EXECUTE format(
-            'CREATE TABLE %I PARTITION OF posts FOR VALUES FROM (%L) TO (%L)',
-            partition_name,
-            date_trunc('month', NEW.created_at),
-            date_trunc('month', NEW.created_at) + INTERVAL '1 month'
-        );
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- 更新时间触发器函数
+-- 更新时间自动更新
 CREATE OR REPLACE FUNCTION update_modified_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -157,11 +111,6 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
--- 创建分区触发器
-CREATE TRIGGER trg_create_post_partition
-BEFORE INSERT ON posts
-FOR EACH ROW EXECUTE FUNCTION create_post_partition();
 
 -- 创建更新时间触发器
 CREATE TRIGGER update_posts_modtime 

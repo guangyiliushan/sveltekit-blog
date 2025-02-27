@@ -17,9 +17,10 @@ export const posts = pgTable('posts', {
 	id: text('id').primaryKey().notNull(),
 	title: text('title').notNull(),
 	content: text('content').notNull(),
+    published: boolean('published').default(false).notNull(),
 	authorId: uuid('author_id').references(() => users.id),
-	createdAt: timestamp('createdAt').defaultNow().notNull(),
-	updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const session = pgTable('session', {

@@ -1,68 +1,90 @@
 <script lang="ts">
-  import SvelteMarkdown from '@humanspeak/svelte-markdown'
-  import type {
-    Token,
-    TokensList,
-    SvelteMarkdownOptions
-} from '@humanspeak/svelte-markdown'
-  import { onMount } from 'svelte'
+	import SvelteMarkdown from '@humanspeak/svelte-markdown';
+	import type { Token, TokensList, SvelteMarkdownOptions } from '@humanspeak/svelte-markdown';
+	import { onMount } from 'svelte';
 
-  let ogText = `# Welcome to My Markdown Playground! 🎨
+	let ogText = ``;
 
-Hey there! This is a *fun* example of mixing **Markdown** and <em>HTML</em> together.
+	let source = $state(ogText);
+	let value = $state(ogText);
+	let browser = $state(false);
 
-## Things I Love:
-1. Writing in <strong>bold</strong> and _italic_
-2. Making lists (like this one!)
-3. Using emojis 🚀 ✨ 🌈
+	const onKeyupTextArea = async () => {
+		source = value;
+	};
 
-| Feature | Markdown | HTML |
-|---------|:--------:|-----:|
-| Bold | **text** | <strong>text</strong> |
-| Italic | *text* | <em>text</em> |
-| Links | [text](url) | <a href="url">text</a> |
+	const showParsed = async (parsedTokens: Token[] | TokensList) => {
+		console.log('displaying tokens', parsedTokens);
+	};
 
-Here's a quote for you:
-> "The best of both worlds" - <cite>Someone who loves markdown & HTML</cite>
-
-You can even use <sup>superscript</sup> and <sub>subscript</sub> text!
-
----
-
-<details>
-<summary>Want to see something cool?</summary>
-Here's a hidden surprise! 🎉
-</details>
-
-Happy coding! <span style="color: hotpink">♥</span>`
-
-  let source = $state(ogText)
-  let value = $state(ogText)
-  let browser = $state(false)
-
-  const onKeyupTextArea = async () => {
-      source = value
-  }
-
-  const showParsed = async (parsedTokens: Token[] | TokensList) => {
-      console.log('displaying tokens', parsedTokens)
-  }
-
-  onMount(() => {
-      browser = true
-  })
+	onMount(() => {
+		browser = true;
+	});
 </script>
 
-<div>
-  <textarea bind:value onkeyup={onKeyupTextArea}></textarea>
+<div class="editor-container">
+	<div class="editor-pane">
+		<form method="post" action="?/createPost">
+			<input type="text" name="title" placeholder="输入文章标题..." />
+			<textarea
+				bind:value
+				onkeyup={onKeyupTextArea}
+				name="content"
+				class="markdown-editor"
+				placeholder="输入Markdown内容..."
+			></textarea>
+			<button type="submit">保存文章</button>
+		</form>
+	</div>
+	<div class="preview-pane">
+		{#if browser}
+			<SvelteMarkdown {source} parsed={showParsed} />
+		{/if}
+	</div>
 </div>
-<div>
-  Server:
-  <SvelteMarkdown {source} parsed={showParsed} />
-</div>
-<div>
-  Browser:
-  {#if browser}
-      <SvelteMarkdown {source} parsed={showParsed} />
-  {/if}
-</div>
+
+<style>
+	.editor-container {
+		display: flex;
+		gap: 2rem;
+		height: 80vh;
+		padding: 1rem;
+	}
+
+	.editor-pane {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.markdown-editor {
+		flex: 1;
+		background: #f9fafb;
+		width: 100%;
+		padding: 1rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		resize: none;
+		font-family: monospace;
+		min-height: 300px;
+	}
+
+	.preview-pane {
+		flex: 1;
+		background: #f9fafb;
+		overflow-y: auto;
+		padding: 1rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+	}
+
+	button {
+		margin-top: 1rem;
+		padding: 0.5rem 1rem;
+		background: #3b82f6;
+		color: white;
+		border: none;
+		border-radius: 0.25rem;
+		cursor: pointer;
+	}
+</style>
