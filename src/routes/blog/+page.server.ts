@@ -6,14 +6,13 @@ import { eq } from 'drizzle-orm';
 export const load = (async () => {
     const publishedPosts = await db
         .select({
+            id: posts.id,
             title: posts.title,
             createdAt: posts.createdAt
         })
         .from(posts)
         .where(eq(posts.published, true))
         .orderBy(posts.createdAt);
-
-    console.log(publishedPosts);
 
     return {
         posts: publishedPosts.map(post => ({

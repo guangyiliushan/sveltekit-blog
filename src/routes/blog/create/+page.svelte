@@ -22,7 +22,7 @@
 	});
 </script>
 
-<div class="editor-container">
+<main class="editor-container">
 	<div class="editor-pane">
 		<form method="post" action="?/createPost">
 			<input type="text" name="title" placeholder="输入文章标题..." />
@@ -41,7 +41,7 @@
 			<SvelteMarkdown {source} parsed={showParsed} />
 		{/if}
 	</div>
-</div>
+</main>
 
 <style>
 	.editor-container {

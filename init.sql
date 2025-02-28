@@ -50,8 +50,7 @@ CREATE TABLE IF NOT EXISTS posts (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     author_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    category VARCHAR(30),
-    is_deleted BOOLEAN DEFAULT FALSE NOT NULL
+    category VARCHAR(30)
 ) WITH (autovacuum_enabled = true);
 
 -- 建议新增关联表代替数组字段
