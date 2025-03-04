@@ -4,8 +4,6 @@ import { posts } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 
-export const prerender = true;
-
 export const entries = async () => {
   const poster = await db.select({ id: posts.id }).from(posts);
   return poster.map(post => ({ post_id: post.id }));
